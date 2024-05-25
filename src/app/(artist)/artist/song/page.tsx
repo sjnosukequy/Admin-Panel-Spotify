@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import Nav_bar from '../../../../components/Nav_bar'
 import Song_item from '../../../../components/Song_item'
+import ip from '@/api/api';
 
 function Artist() {
   const [data, setData] = useState([])
@@ -16,7 +17,7 @@ function Artist() {
     const role = sessionStorage.getItem('role');
     if (username != null && role != null)
       if (role == 'artist') {
-        fetch('http://localhost:3000/getArtistsongs', {
+        fetch(`http://${ip}:3000/getArtistsongs`, {
           method: 'POST', headers: {
             'Content-Type': 'application/json',
           }, body: JSON.stringify({

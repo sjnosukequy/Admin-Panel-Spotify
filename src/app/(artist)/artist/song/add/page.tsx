@@ -6,6 +6,7 @@ import Nav_bar from '@/components/Nav_bar';
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { storage } from '../../../../../firebase/config'
 import { error } from 'console';
+import ip from '@/api/api';
 
 export default function page() {
     const [data, setData] = useState([])
@@ -21,7 +22,7 @@ export default function page() {
         const role = sessionStorage.getItem('role');
         if (username != null && role != null)
             if (role == 'artist') {
-                fetch('http://localhost:3000/getArtistAlbums', {
+                fetch(`http://${ip}:3000/getArtistAlbums`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
                     }, body: JSON.stringify({
@@ -79,7 +80,7 @@ export default function page() {
                 console.log(error)
             });
 
-            await fetch('http://localhost:3000/addArtistsong', {
+            await fetch(`http://${ip}:3000/addArtistsong`, {
                 method: 'POST', headers: {
                     'Content-Type': 'application/json',
                 }, body: JSON.stringify({

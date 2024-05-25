@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Inter, Lexend } from "next/font/google";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
+import ip from '../api/api'
 
 
 export default function Home() {
@@ -18,7 +19,7 @@ export default function Home() {
       return;
     }
     if (role == 'Admin') {
-      await fetch('http://localhost:3000/getAdmin', {
+      await fetch(`http://${ip}:3000/getAdmin`, {
         method: 'POST', headers: {
           'Content-Type': 'application/json',
         }, body: JSON.stringify({
@@ -47,7 +48,7 @@ export default function Home() {
         })
     }
     else if (role == 'Artist') {
-      await fetch('http://localhost:3000/getArtist', {
+      await fetch(`http://${ip}:3000/getArtist`, {
         method: 'POST', headers: {
           'Content-Type': 'application/json',
         }, body: JSON.stringify({
@@ -95,7 +96,7 @@ export default function Home() {
       setWarning('Please fill in everything')
       return;
     }
-    await fetch('http://localhost:3000/upArtist', {
+    await fetch(`http://${ip}:3000/upArtist`, {
       method: 'POST', headers: {
         'Content-Type': 'application/json',
       }, body: JSON.stringify({

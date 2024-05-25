@@ -6,6 +6,7 @@ import Nav_bar from '@/components/Nav_bar';
 import { deleteObject, getStorage, ref, uploadBytes } from "firebase/storage";
 import { storage } from '../../../../../firebase/config'
 import { error } from 'console';
+import ip from '@/api/api';
 
 export default function page() {
     const [id, setId] = useState('');
@@ -25,7 +26,7 @@ export default function page() {
         if (username != null && role != null && id != null)
             if (role == 'artist') {
                 setId(id);
-                fetch('http://localhost:3000/getArtistAlbums', {
+                fetch(`http://${ip}:3000/getArtistAlbums`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
                     }, body: JSON.stringify({
@@ -41,7 +42,7 @@ export default function page() {
                     })
                     .catch((error) => { console.log(error) })
 
-                fetch('http://localhost:3000/getArtistsong', {
+                fetch(`http://${ip}:3000/getArtistsong`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
                     }, body: JSON.stringify({
@@ -93,6 +94,7 @@ export default function page() {
                     console.log('UPLOAD')
                     console.log(snapshot);
                     console.log(`image link: https://firebasestorage.googleapis.com/v0/b/fir-27651.appspot.com/o/music%2F${encodeURIComponent(name)}?alt=media`)
+                    name = `https://firebasestorage.googleapis.com/v0/b/fir-27651.appspot.com/o/music%2F${encodeURIComponent(name)}?alt=media`
                     // console.log(`sound link: https://firebasestorage.googleapis.com/v0/b/fir-27651.appspot.com/o/music%2F${encodeURIComponent(name)}?alt=media`)
                 }).catch((error) => {
                     console.log(error);
@@ -101,14 +103,14 @@ export default function page() {
 
             setLoading(true);
 
-            await fetch('http://localhost:3000/updateArtistsong', {
+            await fetch(`http://${ip}:3000/updateArtistsong`, {
                 method: 'POST', headers: {
                     'Content-Type': 'application/json',
                 }, body: JSON.stringify({
                     "key": "8/k0Y-EJj5S>#/OIA>XB?/q7}",
                     "title": title,
                     "albumid": albumid.value,
-                    "image": `https://firebasestorage.googleapis.com/v0/b/fir-27651.appspot.com/o/music%2F${encodeURIComponent(name)}?alt=media`,
+                    "image": name,
                     "id": id,
                 })
             })
@@ -143,7 +145,7 @@ export default function page() {
             console.log(error)
         });
 
-        await fetch('http://localhost:3000/delArtistsong', {
+        await fetch(`http://${ip}:3000/delArtistsong`, {
             method: 'POST', headers: {
                 'Content-Type': 'application/json',
             }, body: JSON.stringify({

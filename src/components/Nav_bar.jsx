@@ -27,7 +27,7 @@ export default function Nav_bar(props) {
             }
             <div className="flex justify-end w-full">
                 <Dropdown label={user} inline>
-                    <Dropdown.Item onClick={Signout}>Sign out</Dropdown.Item>
+                    <Dropdown.Item className="bg-white" onClick={Signout}>Sign out</Dropdown.Item>
                 </Dropdown>
             </div>
 

@@ -3,6 +3,7 @@ import UserItem from '../../../components/User_item'
 import { useState, useEffect } from 'react'
 import Nav_bar from '@/components/Nav_bar';
 import { useRouter } from 'next/navigation'
+import ip from '@/api/api';
 
 function Admin() {
 
@@ -24,7 +25,7 @@ function Admin() {
     const role = sessionStorage.getItem('role');
     if (username != null && role != null)
       if (role == 'admin') {
-        fetch('http://localhost:3000/getUsers', {
+        fetch(`http://${ip}:3000/getUsers`, {
           method: 'POST', headers: {
             'Content-Type': 'application/json',
           }, body: JSON.stringify({
@@ -43,7 +44,7 @@ function Admin() {
   }, [])
 
   function banuser() {
-    fetch('http://localhost:3000/banUser', {
+    fetch(`http://${ip}:3000/banUser`, {
       method: 'POST', headers: {
         'Content-Type': 'application/json',
       }, body: JSON.stringify({
@@ -59,7 +60,7 @@ function Admin() {
   }
 
   function unbanuser() {
-    fetch('http://localhost:3000/unbanUser', {
+    fetch(`http://${ip}:3000/unbanUser`, {
       method: 'POST', headers: {
         'Content-Type': 'application/json',
       }, body: JSON.stringify({

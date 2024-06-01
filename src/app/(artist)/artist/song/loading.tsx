@@ -1,7 +1,9 @@
 import React from 'react'
 
+// Define the loading component as a functional component
 export default function loading() {
     return (
+        // Outer container with flex layout, centered content, and black background
         <div className="flex-col gap-4 w-full h-screen flex items-center justify-center bg-black">
             <div className="w-28 h-28 border-8 text-blue-400 text-4xl animate-spin border-gray-300 flex items-center justify-center border-t-blue-400 rounded-full">
                 <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em" className="animate-ping">

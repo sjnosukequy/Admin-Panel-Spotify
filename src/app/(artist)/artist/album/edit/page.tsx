@@ -9,6 +9,7 @@ import { error } from 'console';
 import ip from '@/api/api';
 
 export default function page() {
+    // State hooks for managing form data, loading status, warnings, and info messages
     const [id, setId] = useState('');
     const [data2, setData2] = useState({})
     const [title, setTitle] = useState('')
@@ -18,13 +19,16 @@ export default function page() {
     const [warning, setWarning] = useState('');
     const imgRef = useRef<HTMLInputElement>(null)
 
+    // useEffect hook to check user authentication and role when component mounts
     useEffect(() => {
         const username = sessionStorage.getItem('username');
         const role = sessionStorage.getItem('role');
         const id = sessionStorage.getItem('id');
+        // Check if user is logged in and has artist role
         if (username != null && role != null && id != null)
             if (role == 'artist') {
                 setId(id);
+                // Fetch artist album details
                 fetch(`http://${ip}:3000/getArtistAlbum`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
@@ -36,16 +40,18 @@ export default function page() {
                     .then((res) => res.json()) // Return the promise from res.json()
                     .then((data) => {
                         console.log(data);
-                        setData2(data[0])
-                        setInfo(data[0]['info'])
-                        setTitle(data[0]['title'])
-                        setLoading(false)
+                        setData2(data[0]) // Set fetched data
+                        setInfo(data[0]['info']) // Set album info
+                        setTitle(data[0]['title']) // Set album title
+                        setLoading(false) // Update loading status
                     })
                 return;
             }
+        // Redirect to home if not artist
         router.push('/')
     }, [])
 
+    // Function to handle album update
     async function update_butt() {
         console.log(data2)
 
@@ -53,13 +59,14 @@ export default function page() {
             setWarning('UPLOADING...')
             /* 
             // @ts-ignore */
+            // Initialize image name
             let name = data2['image'];
 
             if (imgRef.current?.files?.length) {
-                //FIREBASE UPLOAD
+                // If a new image is uploaded
                 const img = imgRef.current.files[0]
 
-                //DELTHE EXIST FILE
+                // Delete the existing file from Firebase storage
                 const del_name = decodeURI(name.split('music%2F')[1].split('?alt')[0])
                 const desertRef = ref(storage, `music/${del_name}`);
                 await deleteObject(desertRef).then(() => {
@@ -68,6 +75,7 @@ export default function page() {
                     console.log(error)
                 });
 
+                // Prepare the new image name and upload to Firebase
                 name = img.name.split('.')[0] + img.lastModified + '.' + img.name.split('.')[1]
                 console.log(img)
                 console.log(name)
@@ -86,6 +94,7 @@ export default function page() {
 
             setLoading(true);
 
+            // Send updated album details to the server
             await fetch(`http://${ip}:3000/updateArtistAlbum`, {
                 method: 'POST', headers: {
                     'Content-Type': 'application/json',
@@ -103,7 +112,7 @@ export default function page() {
                     if (Object.keys(data[0]).length == 0)
                         setWarning('Update Failed')
                     else {
-                        setData2(data[0])
+                        setData2(data[0]) // Update state with new data
                         setWarning('Update successfully!')
                     }
                     // setLoading(false)
@@ -117,11 +126,12 @@ export default function page() {
         }
     }
 
+    // Function to handle album deletion
     async function del_butt() {
         /* 
         // @ts-ignore */
         const name = data2['image'];
-        //DELTHE EXIST FILE
+        // Delete the existing file from Firebase storage
         const del_name = decodeURI(name.split('music%2F')[1].split('?alt')[0])
         const desertRef = ref(storage, `music/${del_name}`);
         setLoading(true);
@@ -131,7 +141,7 @@ export default function page() {
             console.log(error)
         });
 
-
+        // Send delete request to the server
         await fetch(`http://${ip}:3000/delArtistAlbum`, {
             method: 'POST', headers: {
                 'Content-Type': 'application/json',

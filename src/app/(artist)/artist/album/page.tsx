@@ -6,16 +6,22 @@ import Album_item from '../../../../components/Album_item'
 import ip from '@/api/api';
 
 function Artist() {
+  // State hooks for managing form data, loading status, select, warnings
   const [data, setData] = useState([])
   const [isLoading, setLoading] = useState(true)
   const [select, setSelect] = useState(null);
   const [warning, setWarning] = useState('');
   const router = useRouter();
+
+  // useEffect hook to check user authentication and role when component mounts
   useEffect(() => {
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
+
+    // Check if user is logged in and has artist role
     if (username != null && role != null)
       if (role == 'artist') {
+        // Fetch artist albums from the server
         fetch(`http://${ip}:3000/getArtistAlbums`, {
           method: 'POST', headers: {
             'Content-Type': 'application/json',
@@ -27,20 +33,26 @@ function Artist() {
           .then((res) => res.json()) // Return the promise from res.json()
           .then((data) => {
             console.log(data);
-            setData(data)
-            setLoading(false)
+            setData(data) // Set fetched data
+            setLoading(false) // Update loading status
           })
         return;
       }
+    // Redirect to home if not artist
     router.push('/')
   }, [])
 
   function edit_butt() {
+    // Check if no album is selected
     if (select == null)
+      // Set a warning message if no album is selected
       setWarning('Please select a album');
     else {
+      // If an album is selected, log the selected album ID   
       console.log(select)
+      // Store the selected album ID in session storage
       sessionStorage.setItem('id', select);
+      // Navigate to the album edit page
       router.push('/artist/album/edit')
     }
   }

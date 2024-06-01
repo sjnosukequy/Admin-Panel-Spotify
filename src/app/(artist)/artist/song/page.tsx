@@ -7,16 +7,21 @@ import Song_item from '../../../../components/Song_item'
 import ip from '@/api/api';
 
 function Artist() {
+  // State hooks for managing artist data, loading status, selected song, and warning message
   const [data, setData] = useState([])
   const [isLoading, setLoading] = useState(true)
   const [select, setSelect] = useState(null);
   const [warning, setWarning] = useState('');
   const router = useRouter();
   useEffect(() => {
+    // Retrieve username and role from sessionStorage
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
+    // Check if username and role are not null
     if (username != null && role != null)
+      // Check if the user has the artist role
       if (role == 'artist') {
+        // Fetch artist songs from the server
         fetch(`http://${ip}:3000/getArtistsongs`, {
           method: 'POST', headers: {
             'Content-Type': 'application/json',
@@ -28,21 +33,23 @@ function Artist() {
           .then((res) => res.json()) // Return the promise from res.json()
           .then((data) => {
             console.log(data);
-            setData(data)
-            setLoading(false)
+            setData(data) // Set the fetched data
+            setLoading(false) // Update loading status
           })
-        return;
+        return; 
       }
+    // Redirect to home if user is not an artist
     router.push('/')
   }, [])
 
+   // Function to handle editing a song
   function edit_butt() {
     if (select == null)
-      setWarning('Please select a song');
+      setWarning('Please select a song'); // Set warning message if no song is selected
     else {
       console.log(select)
-      sessionStorage.setItem('id', select);
-      router.push('/artist/song/edit')
+      sessionStorage.setItem('id', select); // Store the selected song ID in sessionStorage
+      router.push('/artist/song/edit') // Navigate to the song editing page
     }
   }
 

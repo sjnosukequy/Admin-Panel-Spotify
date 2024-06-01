@@ -13,18 +13,24 @@ function Admin() {
   //   'email': 'kaksd@',
   //   'nickname': '1232'
   // }
+  // Import hooks and router from 'next/router'
   const router = useRouter()
+  // Hooks to manage state for user data, loading status, ban/unban lists, and info messages
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [banList, setBanList] = useState([]);
   const [unBanList, setUnBanList] = useState([]);
   const [info, setInfo] = useState('');
 
+  // useEffect hook to fetch user data when component mounts
   useEffect(() => {
+    // Retrieve username and role from session storage
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
+    // Check if user is logged in and has admin role
     if (username != null && role != null)
       if (role == 'admin') {
+        // Fetch user data from the server
         fetch(`http://${ip}:3000/getUsers`, {
           method: 'POST', headers: {
             'Content-Type': 'application/json',
@@ -35,15 +41,18 @@ function Admin() {
           .then((res) => res.json()) // Return the promise from res.json()
           .then((data) => {
             // console.log(data);
-            setData(data)
-            setLoading(false)
+            setData(data) // Update state with fetched data
+            setLoading(false) // Update loading status
           })
         return;
       }
+    // Redirect to home if not admin
     router.push('/')
   }, [])
 
+  // Function to handle banning users
   function banuser() {
+    // Send ban request to the server
     fetch(`http://${ip}:3000/banUser`, {
       method: 'POST', headers: {
         'Content-Type': 'application/json',
@@ -54,12 +63,14 @@ function Admin() {
     })
       .then((res) => res.json()) // Return the promise from res.json()
       .then((data) => {
-        setInfo('Successfully ban users')
-        console.log(data);
+        setInfo('Successfully ban users') // Set inform message
+        console.log(data); // Log the response data
       })
   }
 
+  // Function to handle unbanning users
   function unbanuser() {
+    // Send unban request to the server
     fetch(`http://${ip}:3000/unbanUser`, {
       method: 'POST', headers: {
         'Content-Type': 'application/json',
@@ -70,11 +81,12 @@ function Admin() {
     })
       .then((res) => res.json()) // Return the promise from res.json()
       .then((data) => {
-        setInfo('Successfully unban users')
-        console.log(data);
+        setInfo('Successfully unban users') // Update inform message
+        console.log(data); // Log the response data
       })
   }
 
+  // Render loading spinner if data is still being fetched
   if (isLoading) return (
 
     <div className="flex-col gap-4 w-full h-screen flex items-center justify-center bg-black">
@@ -85,8 +97,10 @@ function Admin() {
       </div>
     </div>
   )
+  // Render message if no user data is available
   if (!data) return <p>No profile data</p>
 
+  // Main render block for the admin page
   return (
     <div>
       <Nav_bar flag="false"></Nav_bar>

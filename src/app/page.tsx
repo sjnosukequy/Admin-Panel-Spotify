@@ -13,11 +13,14 @@ export default function Home() {
   const [passWord, setPassWord] = useState('');
   const router = useRouter()
 
+  // Function for handling user authentication
   async function auth() {
+    // Check if username and password are provided
     if (userName == '' && passWord == '') {
       setWarning('Please fill in everything')
       return;
     }
+    // If the role is Admin
     if (role == 'Admin') {
       await fetch(`http://${ip}:3000/getAdmin`, {
         method: 'POST', headers: {
@@ -31,22 +34,27 @@ export default function Home() {
         .then((res) => res.json()) // Return the promise from res.json()
         .then((data) => {
           console.log(data);
+          // If user data is retrieved
           if (Object.keys(data[0]).length != 0) {
+            // Check if the account is banned
             if (data[0]['ban']) {
               setWarning('SORRY YOUT ACCOUNT IS BANNED OR DELETED')
               console.log('bannn')
               return;
             }
+            // Store user information in session storage and redirect to admin panel
             sessionStorage.setItem('username', data[0]['username'])
             sessionStorage.setItem('role', data[0]['role'])
             router.push('/admin')
           }
           else {
+            // Clear session storage and display error message
             sessionStorage.clear();
             setWarning('Wrong email/username or password')
           }
         })
     }
+    // If the role is Artist
     else if (role == 'Artist') {
       await fetch(`http://${ip}:3000/getArtist`, {
         method: 'POST', headers: {
@@ -60,27 +68,33 @@ export default function Home() {
         .then((res) => res.json()) // Return the promise from res.json()
         .then((data) => {
           console.log(data);
+          // If user data is retrieved
           if (Object.keys(data[0]).length != 0) {
+            // Check if the account is banned
             if (data[0]['ban']) {
               setWarning('SORRY YOUT ACCOUNT IS BANNED OR DELETED')
               console.log('bannn')
               return;
             }
+            // Store user information in session storage and redirect to artist panel
             sessionStorage.setItem('username', data[0]['username'])
             sessionStorage.setItem('role', data[0]['role'])
             sessionStorage.setItem('userid', data[0]['id'])
             router.push('/artist/album')
           }
           else {
+            // Clear session storage and display error message
             sessionStorage.clear();
             setWarning('Wrong email/username or password')
           }
         })
     }
+    // If the role is not chosen
     else
       setWarning('Please Choose Admin/Artist Login')
   }
 
+  // Effect hook to check if user is already logged in and redirect accordingly
   useEffect(() => {
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
@@ -91,11 +105,14 @@ export default function Home() {
         router.push('/artist/album')
   }, [])
 
+  // Function for upgrading a user to artist role
   async function upArtist() {
+    // Check if username and password are provided
     if (userName == '' && passWord == '') {
       setWarning('Please fill in everything')
       return;
     }
+    // Make a request to upgrade the user to artist
     await fetch(`http://${ip}:3000/upArtist`, {
       method: 'POST', headers: {
         'Content-Type': 'application/json',
@@ -108,18 +125,22 @@ export default function Home() {
       .then((res) => res.json()) // Return the promise from res.json()
       .then((data) => {
         console.log(data);
+        // If user data is retrieved
         if (Object.keys(data[0]).length != 0) {
+          // Check if the account is banned
           if (data[0]['ban']) {
             setWarning('SORRY YOUT ACCOUNT IS BANNED OR DELETED')
             console.log('bannn')
             return;
           }
+          // Store user information in session storage and redirect to artist panel
           sessionStorage.setItem('username', data[0]['username'])
           sessionStorage.setItem('role', data[0]['role'])
           sessionStorage.setItem('userid', data[0]['user_id'])
           router.push('/artist/album')
         }
         else {
+          // Clear session storage and display error message
           sessionStorage.clear();
           setWarning('CANNOT UPGRADE TO ARTIST')
         }

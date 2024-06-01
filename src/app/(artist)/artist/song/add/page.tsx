@@ -17,11 +17,14 @@ export default function page() {
     const imgRef = useRef<HTMLInputElement>(null)
     const songRef = useRef<HTMLInputElement>(null)
 
+    // useEffect hook to check user authentication and role when component mounts
     useEffect(() => {
         const username = sessionStorage.getItem('username');
         const role = sessionStorage.getItem('role');
+        // Check if user is logged in and has artist role
         if (username != null && role != null)
             if (role == 'artist') {
+                // Fetch artist albums from the server
                 fetch(`http://${ip}:3000/getArtistAlbums`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
@@ -33,24 +36,28 @@ export default function page() {
                     .then((res) => res.json()) // Return the promise from res.json()
                     .then((data) => {
                         console.log(data);
-                        setData(data)
-                        setLoading(false)
+                        setData(data) // Set fetched data
+                        setLoading(false) // Update loading status
                     })
                     .catch((error)=>{
                         console.log(error)
                     })
                 return;
             }
+        // Redirect to home if not artist
         router.push('/')
     }, [])
 
+    // Function to handle adding a new track
     async function addTrack() {
         const albumid = window.document.getElementById('cars') as HTMLInputElement;
+        // Check if all required fields are filled
         if (albumid != null && title.length != 0 && imgRef.current?.files?.length && songRef.current?.files?.length) {
            
-            //FIREBASE UPLOAD
+            // Firebase upload for image
             const img = imgRef.current.files[0]
             const img_name = img.name.split('.')[0] + img.lastModified + '.' + img.name.split('.')[1]
+            // Firebase upload for song
             const song = songRef.current.files[0]
             const song_name = song.name.split('.')[0] + song.lastModified + '.' + song.name.split('.')[1]
 
@@ -59,6 +66,7 @@ export default function page() {
             console.log(img)
             // console.log(name)
 
+            // Upload image to Firebase storagev
             const storageRef = ref(storage, `music/${img_name}`);
             await uploadBytes(storageRef, img).then((snapshot) => {
                 console.log('up')
@@ -69,7 +77,7 @@ export default function page() {
                 console.log(error)
             });
           
-
+            // Upload song to Firebase storage
             const storageRef2 = ref(storage, `music/${song_name}`);
             await uploadBytes(storageRef2, song).then((snapshot) => {
                 console.log('up')
@@ -80,6 +88,7 @@ export default function page() {
                 console.log(error)
             });
 
+            // Add the new track to the server
             await fetch(`http://${ip}:3000/addArtistsong`, {
                 method: 'POST', headers: {
                     'Content-Type': 'application/json',
@@ -94,23 +103,25 @@ export default function page() {
             })
                 .then((res) => res.json()) // Return the promise from res.json()
                 .then((data) => {
+                    // Check if the response data is empty
                     if (Object.keys(data[0]).length == 0) {
-                        setWarning('Add Failed')
-                        setTimeout(() => { setLoading(false) }, 1000)
+                        setWarning('Add Failed') // Set a warning message if the addition failed
+                        setTimeout(() => { setLoading(false) }, 1000) // Delay setting the loading state to false by 1 second
                     }
                     else {
-                        console.log(data)
-                        setWarning('Add successfully!')
-                        setTimeout(() => { router.back() }, 1000)
+                        console.log(data) // Log the response data if the addition succeeded
+                        setWarning('Add successfully!') // Set a success message
+                        setTimeout(() => { router.back() }, 1000) // Navigate back to the previous page after 1 second
                     }
                     // setLoading(false)
                 })
                 .catch((error) => {
-                    console.log(error)
-                    setTimeout(() => { setLoading(false) }, 1000)
+                    console.log(error) // Log any errors encountered during the fetch
+                    setTimeout(() => { setLoading(false) }, 1000) // Delay setting the loading state to false by 1 second in case of an error
                 })
         }
         else
+            // Show warning if not all fields are filled
             setWarning('Please fill in everything')
     }
 

@@ -9,6 +9,7 @@ import { error } from 'console';
 import ip from '@/api/api';
 
 export default function page() {
+    // State hooks for managing form data, loading status, warnings, and info messages
     const [data, setData] = useState([])
     const [title, setTitle] = useState('')
     const [isLoading, setLoading] = useState(true)
@@ -17,6 +18,7 @@ export default function page() {
     const [warning, setWarning] = useState('');
     const imgRef = useRef<HTMLInputElement>(null)
 
+    // useEffect hook to check user authentication and role when component mounts
     useEffect(() => {
         const username = sessionStorage.getItem('username');
         const role = sessionStorage.getItem('role');
@@ -25,10 +27,13 @@ export default function page() {
                 setLoading(false)
                 return;
             }
+        // Redirect to home if not an artist
         router.push('/')
     }, [])
 
+    // Function to handle the submission of a new album
     async function addTrack() {
+        // Check if title and image file are provided
         if (title.length != 0 && imgRef.current?.files?.length) {
 
             //FIREBASE UPLOAD
@@ -38,6 +43,7 @@ export default function page() {
             console.log(img)
             console.log(name)
 
+            // Upload the image to Firebase storage
             const storageRef = ref(storage, `music/${name}`);
             await uploadBytes(storageRef, img).then((snapshot) => {
                 console.log('up')
@@ -49,6 +55,7 @@ export default function page() {
             });
 
             //ADD ALBUM API
+            // Call the API to add the album with the provided details
             await fetch(`http://${ip}:3000/addArtistAlbum`, {
                 method: 'POST', headers: {
                     'Content-Type': 'application/json',
@@ -81,6 +88,7 @@ export default function page() {
             setWarning('Please fill in everything')
     }
 
+    // Render loading spinner if data is still being fetched
     if (isLoading) return (
 
         <div className="flex-col gap-4 w-full h-screen flex items-center justify-center bg-black">
@@ -91,7 +99,8 @@ export default function page() {
             </div>
         </div>
     )
-
+    
+    // Main render block for the form
     return (
         <div>
 

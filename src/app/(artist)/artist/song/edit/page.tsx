@@ -19,13 +19,16 @@ export default function page() {
     const [warning, setWarning] = useState('');
     const imgRef = useRef<HTMLInputElement>(null)
 
+    // useEffect hook to check user authentication and role when component mounts
     useEffect(() => {
         const username = sessionStorage.getItem('username');
         const role = sessionStorage.getItem('role');
         const id = sessionStorage.getItem('id');
+        // Check if user is logged in, has artist role, and if id is available in session storage
         if (username != null && role != null && id != null)
             if (role == 'artist') {
                 setId(id);
+                // Fetch artist albums from the server
                 fetch(`http://${ip}:3000/getArtistAlbums`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
@@ -37,11 +40,12 @@ export default function page() {
                     .then((res) => res.json()) // Return the promise from res.json()
                     .then((data) => {
                         // console.log(data);
-                        setData(data)
+                        setData(data) // Set fetched data for albums
                         // setLoading(false)
                     })
-                    .catch((error) => { console.log(error) })
+                    .catch((error) => { console.log(error) }) // Log any errors encountered during fetch
 
+                // Fetch artist song details from the server
                 fetch(`http://${ip}:3000/getArtistsong`, {
                     method: 'POST', headers: {
                         'Content-Type': 'application/json',
@@ -53,30 +57,34 @@ export default function page() {
                     .then((res) => res.json()) // Return the promise from res.json()
                     .then((data) => {
                         console.log(data);
-                        setData2(data[0])
-                        setTrackid(data[0]['albumid'])
-                        setTitle(data[0]['title'])
-                        setLoading(false)
+                        setData2(data[0]) // Set fetched song data
+                        setTrackid(data[0]['albumid']) // Set the track ID
+                        setTitle(data[0]['title']) // Set the song title
+                        setLoading(false) // Update loading status
                     })
-                    .catch((error) => { console.log(error) })
+                    .catch((error) => { console.log(error) }) // Log any errors encountered during fetch
                 return;
             }
+        // Redirect to home if not artist
         router.push('/')
     }, [])
 
+    // Function to handle song update
     async function update_butt() {
+        // Get the album ID from the dropdown
         const albumid = window.document.getElementById('cars') as HTMLInputElement;
         console.log(data2)
         if (albumid != null && title.length != 0) {
             /* 
             // @ts-ignore */
-            let name = data2['image'];
-            setWarning('UPLOADING...')
+            let name = data2['image']; // Get the current image URL
+            setWarning('UPLOADING...') // Set a warning message for uploading status
+            // Check if there is a new image file to upload
             if (imgRef.current?.files?.length) {
                 //FIREBASE UPLOAD
-                const img = imgRef.current.files[0]
+                const img = imgRef.current.files[0] // Get the new image file
 
-                //DELTHE EXIST FILE
+                // Delete the existing file in Firebase storage
                 const del_name = decodeURI(name.split('music%2F')[1].split('?alt')[0])
                 const desertRef = ref(storage, `music/${del_name}`);
                 await deleteObject(desertRef).then(() => {
@@ -85,10 +93,12 @@ export default function page() {
                     console.log(error)
                 });
 
+                // Prepare the new image file for upload
                 name = img.name.split('.')[0] + img.lastModified + '.' + img.name.split('.')[1]
                 console.log(img)
                 console.log(name)
 
+                // Upload the new image file to Firebase storage
                 const storageRef = ref(storage, `music/${name}`);
                 await uploadBytes(storageRef, img).then((snapshot) => {
                     console.log('UPLOAD')
@@ -101,8 +111,9 @@ export default function page() {
                 });
             }
 
-            setLoading(true);
+            setLoading(true); // Set loading state to true
 
+            // Send a request to update the song details on the server
             await fetch(`http://${ip}:3000/updateArtistsong`, {
                 method: 'POST', headers: {
                     'Content-Type': 'application/json',
@@ -116,33 +127,38 @@ export default function page() {
             })
                 .then((res) => res.json()) // Return the promise from res.json()
                 .then((data) => {
+                    // Check if the update was successful
                     if (Object.keys(data[0]).length == 0)
-                        setWarning('Update Failed')
+                        setWarning('Update Failed') // Set warning message if update failed
                     else {
-                        setData2(data[0])
-                        setWarning('Update successfully!')
+                        setData2(data[0]) // Update the state with new data
+                        setWarning('Update successfully!') // Set success message
                     }
                     // setLoading(false)
                 })
-                .catch((error) => { console.log(error) })
-            setTimeout(() => { setLoading(false) }, 1000)
+                .catch((error) => { console.log(error) }) // Log any errors encountered during fetch
+            setTimeout(() => { setLoading(false) }, 1000) // Delay setting the loading state to false by 1 second
         }
         else
-            setWarning('Please fill in everything')
+            setWarning('Please fill in everything') // Set warning message if validation fails
     }
 
+    // Function to handle song deletion
     async function del_butt() {
         /* 
         // @ts-ignore */
+        // Retrieve the current image URL from the state data
         const name = data2['image'];
-        //DELTHE EXIST FILE
+        // Extract the file name from the image URL for deletion
         const del_name = decodeURI(name.split('music%2F')[1].split('?alt')[0])
         const desertRef = ref(storage, `music/${del_name}`);
+        // Set loading state to true while deletion is in progress
         setLoading(true);
+        // Delete the existing file from Firebase storage
         await deleteObject(desertRef).then(() => {
-            console.log(`DEL: music/${del_name}`)
+            console.log(`DEL: music/${del_name}`) 
         }).catch((error) => {
-            console.log(error)
+            console.log(error) // Log any errors encountered during deletion
         });
 
         await fetch(`http://${ip}:3000/delArtistsong`, {
@@ -155,19 +171,21 @@ export default function page() {
         })
             .then((res) => res.json()) // Return the promise from res.json()
             .then((data) => {
-                setLoading(true);
+                setLoading(true); // Ensure loading state is true while processing response
+
+                // Check if the deletion was successful
                 if (Object.keys(data[0]).length == 0) {
-                    setWarning('Delete Failed')
-                    setTimeout(() => { setLoading(false) }, 1000)
+                    setWarning('Delete Failed') // Set warning message if deletion failed
+                    setTimeout(() => { setLoading(false) }, 1000) // Delay setting the loading state to false by 1 second
                 }
                 else {
-                    setWarning('Delete successfully!')
-                    sessionStorage.removeItem('id')
-                    setTimeout(() => { router.back() }, 1000)
+                    setWarning('Delete successfully!') // Set success message
+                    sessionStorage.removeItem('id') // Remove the ID from session storage
+                    setTimeout(() => { router.back() }, 1000) // Navigate back to the previous page after 1 second
                 }
                 // setLoading(false)
             })
-            .catch((error) => { console.log(error) })
+            .catch((error) => { console.log(error) }) // Log any errors encountered during fetch
 
     }
 
